@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}
+  {% if category_name %}{{ category_name }} — {% elif query %}Tìm: "{{ query }}" — {% endif %}Phương's Daily
+{% endblock %}
+
+{% block content %}
+
+{% if not articles %}
+<div class="empty-state">
+  <h3>📭 Chưa có báo cáo</h3>
+  <p>Hệ thống sẽ tạo báo cáo đầu tiên vào 8:00 sáng mai.<br>
+  <a href="/refresh" style="color:var(--accent);">Yêu cầu chạy báo cáo ngay</a></p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
+    <a href="/date/{{ prev_date }}" class="date-nav-btn">‹ Xem ngày {{ prev_date }}</a>
+    <a href="/" class="date-nav-btn">Về hôm nay</a>
+  </div>
+</div>
+
+{% else %}
+
+{% set featured = articles[0] %}
+{% set remaining = articles[1:] %}
+
+<!-- SECTION LABEL -->
+<div class="section-label">
+  {% if category_name %}{{ category_name }}
+  {% elif query %}🔍 Kết quả: "{{ query }}" ({{ articles|length }})
+  {% else %}Báo cáo ngày {{ selected_date_display }}{% endif %}
+</div>
+
+<!-- FEATURED HERO -->
+{% if not category_name and not query %}
+<div class="featured-hero">
+  <div class="featured-card">
+    <div class="featured-content">
+      <div class="featured-badge">{{ featured.category_name }}</div>
+      <h2 class="featured-title"><a href="/article/{{ featured.id }}">{{ featured.title }}</a></h2>
+      <p class="featured-excerpt">{{ featured.excerpt[:200] }}{% if featured.excerpt|length > 200 %}...{% endif %}</p>
+      <div class="featured-meta">{{ featured.date_display }} · <a href="/article/{{ featured.id }}" style="color:var(--accent);text-decoration:underline;font-size:11px;">Đọc tiếp →</a></div>
+    </div>
+    <div class="featured-visual{% if featured.get('lead_image') %} has-image{% endif %}"
+         {% if featured.get('lead_image') %}style="background-image:url('{{ featured.lead_image }}');"{% endif %}>
+      {% if not featured.get('lead_image') %}{{ featured.emoji or '📰' }}{% endif %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- NEWS GRID -->
+<div class="news-grid">
+  {% for art in (remaining if not category_name and not query else articles) %}
+  <article class="article-card">
+    {% if art.get('lead_image') %}
+    <div class="card-image" style="background-image:url('{{ art.lead_image }}');"></div>
+    {% endif %}
+    <div class="card-badge">{{ art.category_name }}</div>
+    <h3 class="card-title"><a href="/article/{{ art.id }}">{{ art.title }}</a></h3>
+    {% if art.excerpt %}
+    <p class="card-excerpt">{{ art.excerpt[:120] }}{% if art.excerpt|length > 120 %}...{% endif %}</p>
+    {% endif %}
+    <div class="card-meta">
+      {{ art.date_display }}
+      {% for tag in art.tags[:2] %}<span class="card-tag">{{ tag }}</span>{% endfor %}
+    </div>
+  </article>
+  {% endfor %}
+</div>
+
+<!-- ARCHIVE -->
+{% if all_dates and not query and not category_name %}
+<div class="archive-section">
+  <div class="archive-label">Kho lưu trữ</div>
+  <div class="archive-dates">
+    {% for d in all_dates[:14] %}
+    <a href="/date/{{ d }}" class="{% if d == selected_date_iso %}active{% endif %}">{{ d }}</a>
+    {% endfor %}
+    {% if all_dates|length > 14 %}
+    <span style="color:var(--text-light);padding:4px 0;">+{{ all_dates|length - 14 }} ngày</span>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+{% endif %}
+{% endblock %}

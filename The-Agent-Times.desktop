@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Phương's Daily 📡
+Comment=Báo cáo Kinh tế & Công nghệ tự động hàng ngày
+Exec=/home/chillalot/.hermes/profiles/meow/frontend/launch.sh
+Icon=/home/chillalot/.hermes/profiles/meow/frontend/static/icon.png
+Terminal=true
+Type=Application
+Categories=Office;News;
+StartupNotify=true
+X-Desktop-File-Install-Version=1.0

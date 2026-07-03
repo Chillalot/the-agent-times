@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Đang làm mới... — Phương's Daily{% endblock %}
+
+{% block content %}
+<article class="article-wrap">
+  <div class="article-badge">🔄 Hệ thống</div>
+  <h1 class="article-headline">Đang cập nhật báo cáo</h1>
+  <div class="article-divider"></div>
+
+  <div class="article-body" style="max-width:500px;margin:0 auto;text-align:left;">
+    {% for result in results %}
+    <p style="{% if result.startswith('✅') %}color:#1a7d36{% elif result.startswith('❌') %}color:var(--accent){% endif %}">
+      {{ result }}
+    </p>
+    {% endfor %}
+
+    <div style="text-align:center;margin-top:24px;">
+      <p style="color:var(--text-gray);margin-bottom:16px;">Tự động về trang chủ sau 3 giây...</p>
+      <a href="/" class="date-nav-btn">Về trang chủ</a>
+    </div>
+  </div>
+</article>
+<script>setTimeout(function(){window.location.href='/'},3000);</script>
+{% endblock %}

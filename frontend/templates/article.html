@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}{{ article.title }} — Phương's Daily{% endblock %}
+
+{% block content %}
+<!-- ARTICLE LAYOUT: content left + sidebar right -->
+<div class="article-layout">
+
+  <!-- MAIN CONTENT (left) -->
+  <div class="article-main">
+    <article class="article-wrap">
+      <div class="article-badge">{{ article.category_name }}</div>
+      <h1 class="article-headline">{{ article.title }}</h1>
+      <div class="article-divider"></div>
+      <div class="article-byline">Bởi <strong>Phương</strong> — Hệ thống báo cáo tự động</div>
+      <div class="article-date">{{ article.date_display }}</div>
+
+      {% if article.tags %}
+      <div class="article-tags">
+        {% for tag in article.tags %}
+        <span class="article-tag">#{{ tag }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Featured image -->
+      {% if article.get('lead_image') %}
+      <div style="margin-bottom:24px;">
+        <img src="{{ article.lead_image }}" alt="{{ article.title }}" style="width:100%;max-width:100%;border:1px solid var(--border-light);">
+      </div>
+      {% endif %}
+
+      <div class="article-body">
+        {{ article.content_html | safe }}
+      </div>
+
+      {% if article.sources %}
+      <div class="article-sources">
+        <h3>Nguồn tham khảo</h3>
+        <ul>
+          {% for source in article.sources %}
+          <li><a href="{{ source }}" target="_blank">{{ source }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <div class="article-nav">
+        <a href="/date/{{ article.date }}">← Ngày {{ article.date }}</a>
+        <a href="/">Trang chủ</a>
+        {% if article.category %}
+        <a href="/category/{{ article.category }}">{{ article.category_name }}</a>
+        {% endif %}
+      </div>
+    </article>
+  </div>
+
+  <!-- SIDEBAR (right) -->
+  <aside class="article-sidebar">
+    <div class="sidebar-heading">📰 Có thể bạn muốn đọc</div>
+
+    {% if related_articles %}
+    <div class="related-list">
+      {% for rel in related_articles %}
+      <a href="/article/{{ rel.id }}" class="related-item">
+        <span class="related-emoji">{{ rel.emoji or '📄' }}</span>
+        <span class="related-text">
+          <span class="related-title">{{ rel.title }}</span>
+          <span class="related-date">{{ rel.date_display }}</span>
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="sidebar-empty">Chưa có bài viết liên quan.</p>
+    {% endif %}
+
+    <div class="sidebar-more">
+      {% if article.category %}
+      <a href="/category/{{ article.category }}" class="sidebar-more-link">Xem thêm {{ article.category_name }} →</a>
+      {% else %}
+      <a href="/" class="sidebar-more-link">Xem thêm →</a>
+      {% endif %}
+    </div>
+  </aside>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof gsap !== 'undefined' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    gsap.from('.article-headline', { opacity: 0, y: 15, duration: 0.6, ease: 'power2.out' });
+    gsap.from('.article-body', { opacity: 0, y: 8, duration: 0.4, delay: 0.2 });
+    gsap.from('.article-sources', { opacity: 0, duration: 0.3, delay: 0.4 });
+    gsap.from('.article-sidebar', { opacity: 0, x: 20, duration: 0.5, delay: 0.3 });
+  }
+});
+</script>
+{% endblock %}

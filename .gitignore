@@ -1,0 +1,26 @@
+# Scraped data (each user has their own)
+reports/
+*.json
+
+# Cache
+__pycache__/
+*.pyc
+*.log
+.cache/
+
+# Environment
+venv/
+.env
+.hermes/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Server generated
+.launched
+.shutdown
+server.log
+
+# User data directory
+data/

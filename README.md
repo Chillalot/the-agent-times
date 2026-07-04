@@ -14,22 +14,37 @@ Reads full articles from 24 RSS feeds across 10 countries, extracts clean conten
   <img src="https://img.shields.io/github/last-commit/Chillalot/the-agent-times" alt="Last Commit">
 </p>
 
-## Screenshots
+## Highlights
 
-| Homepage (light) | Article Page | Category View |
+- **24 RSS feeds** — 9 Vietnamese + 10 international + 5 tech
+- **10 countries** — US, UK, Japan, China, France, Germany, South Korea, Australia, Singapore, India
+- **Full article extraction** — not headlines, not summaries
+- **Vietnamese translation** — international content translated automatically
+- **GitHub Radar** — trending repos with 100+ stars
+- **Self-hosted** — your data, your server
+- **JSON storage** — portable, queryable, backup-friendly
+- **Dark mode** — semantic theme swap, persisted
+
+## Screenshots & Demo
+
+| Homepage | Article Page | Dark Theme |
 |:---:|:---:|:---:|
-| ![Homepage](docs/screenshots/homepage.png) | ![Article](docs/screenshots/article.png) | ![Technology](docs/screenshots/technology.png) |
+| ![Homepage](docs/screenshots/homepage.png) | ![Article](docs/screenshots/article.png) | ![Dark](docs/screenshots/dark-homepage.png) |
 
-| Mobile | Dark Theme |
+| Mobile | Technology |
 |:---:|:---:|
-| ![Mobile](docs/screenshots/mobile.png) | ![Dark](docs/screenshots/homepage.png) |
+| ![Mobile](docs/screenshots/mobile.png) | ![Tech](docs/screenshots/technology.png) |
+
+### Demo
+
+![Demo GIF](docs/gifs/demo.gif)
 
 ## Features
 
 ### News Pipeline
 
-- **RSS aggregation** — 24 feeds from 10 countries (US, UK, Japan, China, France, Germany, South Korea, Australia, Singapore, India) plus 9 Vietnamese sources (VnExpress, Tuổi Trẻ, VietnamNet)
-- **Full article extraction** — Every RSS link is fetched, parsed, and cleaned. No headline-only summaries. VnExpress HTML wrappers and inline classes are stripped automatically.
+- **RSS aggregation** — 24 feeds from 10 countries plus 9 Vietnamese sources (VnExpress, Tuổi Trẻ, VietnamNet)
+- **Full article extraction** — Every RSS link is fetched, parsed, and cleaned. VnExpress HTML wrappers and inline classes are stripped automatically.
 - **Translation** — International articles are translated to Vietnamese via googletrans. Titles, descriptions, and full body content.
 - **GitHub Radar** — Scans GitHub trending repos, filters for projects with 100+ stars, writes a full article per repo.
 - **Date archive** — Browse any day's articles via calendar picker or prev/next navigation.
@@ -54,18 +69,72 @@ Most news readers only aggregate RSS headlines. They show you a title and a link
 
 The Agent Times reads the full article for you. It scrapes the content, strips the clutter, removes VnExpress-specific HTML classes, translates foreign articles into Vietnamese, and saves everything as a clean, searchable article — no ads, no banners, no pageload delay.
 
+## Example Article
+
+Here is what a scraped and cleaned article looks like internally:
+
+```json
+{
+  "id": "article_2026-07-03_76c229cd",
+  "title": "Ông Trump đã mua cổ phiếu Apple, Nvidia trước khi hoãn áp thuế",
+  "date": "2026-07-03",
+  "category": "legal",
+  "lead_image": "https://i1-kinhdoanh.vnecdn.net/.../AP26166598955758.jpg",
+  "word_count": 772,
+  "tags": ["pháp-lý", "công-nghệ", "thế-giới"],
+  "content_html": "<figure><img src=\"...\"/></figure><p>...</p>",
+  "source_url": "https://vnexpress.net/example-article"
+}
+```
+
+The JSON format makes the archive portable — backup, query, or process with external tools.
+
 ## Architecture
 
 ```mermaid
-graph LR
-    RSS[24 RSS Feeds] --> COLLECTOR[RSS Collector]
-    COLLECTOR --> SCRAPER[Article Scraper]
-    SCRAPER --> TRANSLATOR[googletrans]
-    TRANSLATOR --> JSON[JSON Storage]
-    JSON --> FLASK[Flask Server]
-    FLASK --> UI[Responsive Frontend]
-    GITHUB[GitHub API] --> GH_SCRAPER[GitHub Radar]
-    GH_SCRAPER --> JSON
+graph TD
+    subgraph Sources["📡 Sources"]
+        RSS_VN[VN RSS<br/>9 feeds]
+        RSS_INTL[Intl RSS<br/>10 feeds]
+        RSS_TECH[Tech RSS<br/>5 feeds]
+        GITHUB[GitHub API]
+    end
+
+    subgraph Collection["⬇️ Collection"]
+        DB[daily_briefing.py]
+        INTL[international_news.py]
+        TECH[tech_news.py]
+        GH[github_radar.py]
+    end
+
+    subgraph Processing["⚙️ Processing"]
+        SCRAPER[article_scraper.py<br/>readability + bs4]
+        TRANS[googletrans<br/>translate to VI]
+        WRITER[article_writer.py]
+    end
+
+    subgraph Storage["💾 Storage"]
+        JSON[(Article JSON<br/>data/reports/)]
+    end
+
+    subgraph Frontend["🖥️ Frontend"]
+        FLASK[Flask Server<br/>port 5050]
+        UI[Responsive UI<br/>Jinja2 + CSS + GSAP]
+    end
+
+    RSS_VN --> DB
+    RSS_INTL --> INTL
+    RSS_TECH --> TECH
+    GITHUB --> GH
+    DB --> SCRAPER
+    INTL --> SCRAPER
+    TECH --> SCRAPER
+    SCRAPER --> TRANS
+    TRANS --> JSON
+    GH --> WRITER
+    WRITER --> JSON
+    JSON --> FLASK
+    FLASK --> UI
 ```
 
 ## Project Structure
@@ -75,7 +144,7 @@ the-agent-times/
 ├── frontend/              # Flask web application (port 5050)
 │   ├── app.py             # Server + routes + article loader
 │   ├── static/style.css   # Design tokens, dark/light theme
-│   └── templates/         # Jinja2 templates (base, index, article)
+│   └── templates/         # Jinja2 templates
 ├── scripts/               # Data collection & processing
 │   ├── daily_briefing.py  # VN RSS collector (9 feeds)
 │   ├── international_news.py  # 10-country RSS + translate
@@ -84,17 +153,31 @@ the-agent-times/
 │   ├── github_radar.py    # Trending repos scanner
 │   └── github_article_writer.py  # Repo → article converter
 ├── data/reports/          # Article JSON files (auto-generated)
-├── docs/                  # Screenshots, architecture diagrams
+├── docs/                  # Screenshots, architecture, GIFs
 └── skills/                # AI agent design skills
 ```
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Backend | Python 3.11+, Flask 3.0+ |
+| Templates | Jinja2 |
+| RSS Parsing | Feedparser, xml.etree |
+| Article Extraction | readability-lxml, BeautifulSoup |
+| Translation | googletrans |
+| Animation | GSAP (JavaScript) |
+| AI Agent Runtime | Hermes Agent |
 
 ## Quick Start
 
 ```bash
 git clone https://github.com/Chillalot/the-agent-times.git
 cd the-agent-times
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r frontend/requirements.txt
-cd frontend && python3 app.py
+python3 frontend/app.py
 ```
 
 Open http://localhost:5050.
@@ -113,9 +196,9 @@ Downloads 9 VN RSS feeds, extracts each article via article_scraper.py, saves cl
 ### Generate International News
 
 ```bash
-python3 international_news.py          # All 10 countries
-python3 international_news.py --country us,uk,france  # Specific countries
-python3 international_news.py --country us --scrape   # With full content scraping
+python3 international_news.py                    # All 10 countries
+python3 international_news.py --country us,uk    # Specific countries
+python3 international_news.py --country us --scrape  # With full content
 ```
 
 Articles are translated to Vietnamese via googletrans.
@@ -132,36 +215,36 @@ Scans GitHub trending, filters repos with 100+ stars, writes one article per rep
 ### Scrape a Single Article
 
 ```bash
-python3 article_scraper.py "https://vnexpress.net/example-article.html" economic
+python3 article_scraper.py "https://vnexpress.net/example" economic
 ```
 
 ### Start the Server
 
 ```bash
 cd frontend && python3 app.py
-# http://localhost:5050
+# → http://localhost:5050
 ```
 
-### Schedule Daily Cronjobs
+### Schedule Daily Automation
 
 ```bash
-07:00 — python3 international_news.py
-08:00 — bash autoreport_daily.sh
-08:30 — (AI news writer in Hermes Agent)
-09:00 — bash autoreport_github.sh
-10:00 — bash autoreport_fnb.sh
+07:00 — International news
+08:00 — VN news + scrape
+08:30 — AI news writer
+09:00 — GitHub radar
+10:00 — F&B reports
 ```
 
 ## Configuration
 
 ### RSS Feeds
 
-Edit `FEEDS` dict at the top of each script:
+Edit the `FEEDS` dict at the top of each script:
 
 ```python
 FEEDS = {
     "my-feed": {
-        "name": "My Feed Name",
+        "name": "My Feed",
         "url": "https://example.com/rss",
         "category": "economic",
         "tags": ["my-tag"],
@@ -174,7 +257,7 @@ FEEDS = {
 Add to `frontend/app.py`:
 
 ```python
-CATEGORY_MAP["my-category"] = {"name": "📂 My Category", "emoji": "📂"}
+CATEGORY_MAP["my-cat"] = {"name": "📂 My Category", "emoji": "📂"}
 ```
 
 Then add a nav link in `frontend/templates/base.html`.
@@ -187,53 +270,57 @@ Edit CSS variables in `frontend/static/style.css`:
 :root {
   --accent: #032435;
   --max-width: 1040px;
-  --font-heading: 'Be Vietnam Pro', sans-serif;
 }
 ```
 
 ### Translation
 
-googletrans is the default backend. To use a different translator, modify `translate_text()` in the relevant script.
+googletrans is the default. To use a different backend, modify `translate_text()` in the relevant script. No API key required for googletrans.
+
+## FAQ
+
+**Why JSON instead of SQL?** JSON files are portable, easy to inspect, trivial to back up, and require zero database setup. The dataset is small enough that filesystem reads are fast.
+
+**Does translation require an API key?** No. googletrans is a free library — no API key, no rate limiting for personal use.
+
+**Can I add my own RSS feeds?** Yes. Add a new entry to the `FEEDS` dict in any script. See the Configuration section.
+
+**Can I deploy with Docker?** Not yet, but it's on the roadmap.
+
+**How do I change the design?** All visual tokens are in `frontend/static/style.css`. Colors, fonts, spacing, and layout are governed by CSS custom properties.
 
 ## Roadmap
 
 - [x] RSS aggregation (24 feeds, 10 countries)
 - [x] Full article scraping + HTML cleanup
-- [x] Vietnamese translation (googletrans)
+- [x] Vietnamese translation
 - [x] GitHub trending radar (100+ stars)
 - [x] Full-text search
+- [x] Dark mode
 - [ ] AI article summaries
 - [ ] Docker Compose deployment
 - [ ] Email newsletter delivery
-- [ ] REST API for articles
+- [ ] REST API
 - [ ] User-defined topic filters
-- [ ] Mobile app (React Native)
+- [ ] Mobile app
 
 ## Design Principles
 
-### Color
-
-3-layer token system. Primitives define raw values (oklch). Semantic tokens map to component roles (--bg, --text, --accent). Components reference only semantic tokens.
-
-### Spacing
-
-4px base grid. Tighter spacing within groups (4-8px), wider between sections (24-48px). Proximity creates visual hierarchy — no heavy borders needed.
-
-### Typography
-
-5-level scale: Display (48px) → Micro (11px). Body width capped at 65 characters for readability. Headings use Be Vietnam Pro, body uses system-ui for better Vietnamese diacritic rendering.
-
-### Animation
-
-Only `transform` and `opacity` are animated. Durations range from 100ms (button presses) to 600ms (page entrances). Easing uses `cubic-bezier(0.25, 1, 0.5, 1)`. Respects `prefers-reduced-motion`.
+| Principle | Implementation |
+|-----------|---------------|
+| Color | 3-layer tokens: Primitives → Semantic → Component |
+| Typography | 5-level scale (48px → 11px), 65ch body width |
+| Spacing | 4px base grid, proximity over borders |
+| Motion | Only `transform` + `opacity`, `prefers-reduced-motion` respected |
+| Dark mode | Semantic token swap, navy palette |
 
 ## Contributing
 
-Pull requests are welcome. For major changes, open an issue first.
+Pull requests welcome. For major changes, open an issue first.
 
-- Add RSS feeds: edit `FEEDS` dict in the relevant script
-- Add categories: update `CATEGORY_MAP` in `app.py` and the nav in `base.html`
-- Fix scraping: the article scraper handles VnExpress-style sites; PRs for other site layouts are appreciated
+- **Add feeds** — edit `FEEDS` dict in the relevant script
+- **Add categories** — update `CATEGORY_MAP` in `app.py` + nav in `base.html`
+- **Fix scraping** — `article_scraper.py` handles VnExpress-style sites; PRs for other layouts appreciated
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for full guidelines.
 
@@ -243,9 +330,24 @@ MIT — free for personal and commercial use.
 
 ## Credits
 
-- [Design-Craft](https://github.com/FasalZein/design-craft) — Design principles for AI agents
-- [Laws of UX](https://github.com/FasalZein/laws-of-ux) — UX psychology rules
-- [GSAP](https://gsap.com) — Animation library
-- [googletrans](https://pypi.org/project/googletrans/) — Translation backend
-- [readability-lxml](https://github.com/burntsushi/readability-lxml) — Article extraction
-- [Hermes Agent](https://hermes-agent.nousresearch.com) — AI agent runtime
+### Libraries
+- readability-lxml — Article extraction
+- BeautifulSoup — HTML parsing
+- googletrans — Translation backend
+- GSAP — Frontend animations
+- Flask — Web server
+
+### Design Inspiration
+- NYT — Typography and layout
+- Axios — Card design and whitespace
+- VnExpress — Vietnamese news layout patterns
+
+### AI Tools
+- Hermes Agent — Cron scheduler and subagent orchestration
+- Design-Craft — Design principles for AI agents
+- Laws of UX — Psychology-driven interface constraints
+- AI Website Cloner Template — Website cloning methodology
+
+---
+
+*This repository's documentation, screenshots, architecture diagrams, and demo assets are automatically generated and maintained by the `documentation-master` skill for Hermes Agent.*

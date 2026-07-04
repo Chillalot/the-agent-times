@@ -6,7 +6,7 @@ Báo cáo Kinh tế, Công nghệ, GitHub, Pháp lý & F&B tự động hàng ng
 import os, json, glob, subprocess, re, threading, time, atexit, signal, sys
 from pathlib import Path
 from datetime import datetime, date, timedelta
-from flask import Flask, render_template, request, abort, redirect, url_for, make_response
+from flask import Flask, render_template, request, abort, redirect, url_for, make_response, jsonify
 
 app = Flask(__name__)
 
@@ -37,7 +37,13 @@ THEMES = [
     {"id": "oled", "name": "OLED", "icon": "⬛"},
 ]
 
-DEFAULT_THEME = "light"
+# === LAYOUT ENGINE ===
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts", "layout-engine"))
+from registry import layout_bp, discover as discover_layouts
+app.register_blueprint(layout_bp)
+
+LAYOUTS = discover_layouts()
+DEFAULT_LAYOUT = "minimal"
 
 CATEGORY_MAP = {
     "economy": {"name": "📰 Kinh tế", "emoji": "📰", "id": "economy"},
@@ -198,7 +204,9 @@ def get_common_context(selected_date=None, category=None, query=None):
     
     context["articles"] = filtered
     context["themes"] = THEMES
-    context["default_theme"] = DEFAULT_THEME
+    context["default_theme"] = "light"
+    context["layouts"] = LAYOUTS
+    context["default_layout"] = DEFAULT_LAYOUT
     
     return context
 

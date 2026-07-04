@@ -31,6 +31,12 @@
         <option value="high-contrast">🔲 High Contrast</option>
         <option value="oled">⬛ OLED</option>
       </select>
+      <select class="layout-select" onchange="setLayout(this.value)" title="Publication Layout">
+        <option value="minimal">📰 Minimal</option>
+        {% for lid, l in layouts.items() %}
+        <option value="{{ lid }}">{{ l.get('name', lid) }}</option>
+        {% endfor %}
+      </select>
     </div>
     <div class="top-bar-right">
       <a href="/" style="color:var(--color-gray-400);text-decoration:none;font-size:11px;">Trang chủ</a>
@@ -114,12 +120,29 @@ function toggleTheme() {
   setTheme(next);
 }
 
+// Publication Layout switching
+function setLayout(l) {
+  document.documentElement.setAttribute('data-layout', l);
+  localStorage.setItem('phuong-layout', l);
+  var sel = document.querySelector('.layout-select');
+  if (sel) sel.value = l;
+}
+
+function getLayout() {
+  return localStorage.getItem('phuong-layout') || 'minimal';
+}
+
 // Apply saved theme immediately
 (function() {
   var t = getTheme();
   document.documentElement.setAttribute('data-theme', t);
   var sel = document.querySelector('.theme-select');
   if (sel) sel.value = t;
+  // Apply saved layout
+  var l = getLayout();
+  document.documentElement.setAttribute('data-layout', l);
+  var sel2 = document.querySelector('.layout-select');
+  if (sel2) sel2.value = l;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     document.documentElement.classList.add('reduce-motion');
   }

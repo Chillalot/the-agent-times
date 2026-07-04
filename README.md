@@ -1,8 +1,12 @@
 # The Agent Times
 
-AI-powered self-hosted newspaper that crawls, translates, organizes and publishes daily news from around the world.
+**A publishing platform built for AI agents.**  
 
-Reads full articles from 24 RSS feeds across 10 countries, extracts clean content, translates foreign news into Vietnamese, and presents them in a responsive newspaper-style frontend — all automated.
+The Agent Times is not an automatic news reader. It is a **toolkit designed to be operated by AI coding agents** (like Claude, Hermes, Cursor, or Codex) to collect, clean, translate, organize, and publish news from around the world.
+
+An AI agent reads the code, runs the scripts, configures the feeds, manages the cronjobs, writes articles, and maintains the frontend — all autonomously. The human only provides the machine and the initial setup.
+
+> Built by an AI agent, for AI agents, to prove that agent-maintained open-source software is viable.
 
 <p align="center">
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT">

@@ -45,6 +45,14 @@ app.register_blueprint(layout_bp)
 LAYOUTS = discover_layouts()
 DEFAULT_LAYOUT = "minimal"
 
+# Auto-generate layout CSS on startup
+_generate_css_path = os.path.join(os.path.dirname(__file__), "..", "scripts", "layout-engine", "generate_css.py")
+if os.path.exists(_generate_css_path):
+    try:
+        subprocess.run(["python3", _generate_css_path], capture_output=True, timeout=10, cwd=os.path.dirname(__file__))
+    except:
+        pass
+
 CATEGORY_MAP = {
     "economy": {"name": "📰 Kinh tế", "emoji": "📰", "id": "economy"},
     "daily-briefing": {"name": "📰 Kinh tế", "emoji": "📰", "id": "daily-briefing"},  # legacy alias

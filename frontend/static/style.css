@@ -127,18 +127,6 @@ body {
   font-family: var(--font-ui); transition: all var(--duration-fast);
 }
 .theme-toggle:hover { background: var(--color-gray-600); color: white; }
-.theme-select {
-  background: transparent; color: var(--color-gray-400);
-  border: 1px solid var(--color-gray-600); padding: 2px 4px;
-  font-size: 11px; cursor: pointer; font-family: var(--font-ui);
-  max-width: 90px;
-}
-.layout-select {
-  background: transparent; color: var(--color-gray-400);
-  border: 1px solid var(--color-gray-600); padding: 2px 4px;
-  font-size: 11px; cursor: pointer; font-family: var(--font-ui);
-  max-width: 110px;
-}
 
 /* ===== HEADER ===== */
 .site-header {

@@ -6,7 +6,7 @@ Báo cáo Kinh tế, Công nghệ, GitHub, Pháp lý & F&B tự động hàng ng
 import os, json, glob, subprocess, re, threading, time, atexit, signal, sys
 from pathlib import Path
 from datetime import datetime, date, timedelta
-from flask import Flask, render_template, request, abort, redirect, url_for, make_response, jsonify
+from flask import Flask, render_template, request, abort, redirect, url_for, make_response
 
 app = Flask(__name__)
 
@@ -23,35 +23,6 @@ def no_cache(response):
 # === CONFIG ===
 REPORTS_DIR = os.path.expanduser("~/.hermes/profiles/meow/reports")
 SCRIPTS_DIR = os.path.expanduser("~/.hermes/profiles/meow/scripts")
-
-THEMES = [
-    {"id": "light", "name": "Classic Newspaper", "icon": "🗞️"},
-    {"id": "modern-magazine", "name": "Modern Magazine", "icon": "✨"},
-    {"id": "minimal", "name": "Minimal", "icon": "◻️"},
-    {"id": "dark", "name": "Dark Mode", "icon": "🌙"},
-    {"id": "paper", "name": "Paper", "icon": "📜"},
-    {"id": "terminal", "name": "Terminal", "icon": "💻"},
-    {"id": "developer", "name": "Developer", "icon": "👨‍💻"},
-    {"id": "comfortable-reading", "name": "Comfortable Read", "icon": "📖"},
-    {"id": "high-contrast", "name": "High Contrast", "icon": "🔲"},
-    {"id": "oled", "name": "OLED", "icon": "⬛"},
-]
-
-# === LAYOUT ENGINE ===
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts", "layout-engine"))
-from registry import layout_bp, discover as discover_layouts
-app.register_blueprint(layout_bp)
-
-LAYOUTS = discover_layouts()
-DEFAULT_LAYOUT = "minimal"
-
-# Auto-generate layout CSS on startup
-_generate_css_path = os.path.join(os.path.dirname(__file__), "..", "scripts", "layout-engine", "generate_css.py")
-if os.path.exists(_generate_css_path):
-    try:
-        subprocess.run(["python3", _generate_css_path], capture_output=True, timeout=10, cwd=os.path.dirname(__file__))
-    except:
-        pass
 
 CATEGORY_MAP = {
     "economy": {"name": "📰 Kinh tế", "emoji": "📰", "id": "economy"},
@@ -211,10 +182,6 @@ def get_common_context(selected_date=None, category=None, query=None):
         context["selected_date_display"] = f'Tìm kiếm: "{query}"'
     
     context["articles"] = filtered
-    context["themes"] = THEMES
-    context["default_theme"] = "light"
-    context["layouts"] = LAYOUTS
-    context["default_layout"] = DEFAULT_LAYOUT
     
     return context
 
@@ -317,10 +284,7 @@ def article(article_id):
                          today_iso=ctx["today_iso"],
                          all_dates=ctx["all_dates"],
                          active_nav=art["category"],
-                         category_colors=ctx["category_colors"],
-                         themes=THEMES,
-                         layouts=LAYOUTS,
-                         default_theme="light")
+                         category_colors=ctx["category_colors"])
 
 
 @app.route("/search")

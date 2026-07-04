@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% from "macros.html" import article_card, article_sidebar, section_label %}
 {% block title %}
   {% if category_name %}{{ category_name }} — {% elif query %}Tìm: "{{ query }}" — {% endif %}Phương's Daily
 {% endblock %}

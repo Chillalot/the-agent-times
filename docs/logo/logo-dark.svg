@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="64" fill="#0d1929"/>
+  <!-- Newspaper body -->
+  <rect x="96" y="96" width="320" height="320" rx="8" fill="#4a9eff"/>
+  <!-- Nameplate -->
+  <rect x="120" y="116" width="272" height="40" rx="4" fill="#0d1929" opacity="0.12"/>
+  <line x1="140" y1="136" x2="372" y2="136" stroke="#0d1929" stroke-width="2" opacity="0.4"/>
+  <line x1="140" y1="146" x2="372" y2="146" stroke="#0d1929" stroke-width="2" opacity="0.4"/>
+  <!-- Articles -->
+  <rect x="140" y="176" width="120" height="14" rx="2" fill="#0d1929" opacity="0.9"/>
+  <rect x="140" y="196" width="100" height="8" rx="2" fill="#0d1929" opacity="0.5"/>
+  <rect x="140" y="210" width="110" height="8" rx="2" fill="#0d1929" opacity="0.5"/>
+  <rect x="140" y="240" width="120" height="14" rx="2" fill="#0d1929" opacity="0.9"/>
+  <rect x="140" y="260" width="90" height="8" rx="2" fill="#0d1929" opacity="0.5"/>
+  <rect x="140" y="274" width="105" height="8" rx="2" fill="#0d1929" opacity="0.5"/>
+  <rect x="140" y="304" width="120" height="14" rx="2" fill="#0d1929" opacity="0.9"/>
+  <rect x="140" y="324" width="95" height="8" rx="2" fill="#0d1929" opacity="0.5"/>
+  <rect x="140" y="338" width="108" height="8" rx="2" fill="#0d1929" opacity="0.5"/>
+  <!-- Right column (sidebar) -->
+  <rect x="280" y="176" width="112" height="8" rx="2" fill="#0d1929" opacity="0.3"/>
+  <rect x="280" y="190" width="112" height="8" rx="2" fill="#0d1929" opacity="0.3"/>
+  <rect x="280" y="204" width="112" height="8" rx="2" fill="#0d1929" opacity="0.3"/>
+  <rect x="280" y="224" width="112" height="8" rx="2" fill="#0d1929" opacity="0.3"/>
+  <rect x="280" y="238" width="112" height="8" rx="2" fill="#0d1929" opacity="0.3"/>
+  <rect x="280" y="252" width="112" height="8" rx="2" fill="#0d1929" opacity="0.3"/>
+  <rect x="280" y="272" width="112" height="8" rx="2" fill="#0d1929" opacity="0.3"/>
+  <rect x="280" y="286" width="112" height="8" rx="2" fill="#0d1929" opacity="0.3"/>
+  <rect x="280" y="306" width="112" height="8" rx="2" fill="#0d1929" opacity="0.3"/>
+  <rect x="280" y="320" width="112" height="8" rx="2" fill="#0d1929" opacity="0.3"/>
+  <!-- "TAT" text at bottom -->
+  <text x="256" y="430" text-anchor="middle" font-family="'Be Vietnam Pro',Arial,sans-serif" font-size="36" font-weight="700" fill="#4a9eff">THE AGENT TIMES</text>
+</svg>

@@ -24,6 +24,21 @@ def no_cache(response):
 REPORTS_DIR = os.path.expanduser("~/.hermes/profiles/meow/reports")
 SCRIPTS_DIR = os.path.expanduser("~/.hermes/profiles/meow/scripts")
 
+THEMES = [
+    {"id": "light", "name": "Classic Newspaper", "icon": "🗞️"},
+    {"id": "modern-magazine", "name": "Modern Magazine", "icon": "✨"},
+    {"id": "minimal", "name": "Minimal", "icon": "◻️"},
+    {"id": "dark", "name": "Dark Mode", "icon": "🌙"},
+    {"id": "paper", "name": "Paper", "icon": "📜"},
+    {"id": "terminal", "name": "Terminal", "icon": "💻"},
+    {"id": "developer", "name": "Developer", "icon": "👨‍💻"},
+    {"id": "comfortable-reading", "name": "Comfortable Read", "icon": "📖"},
+    {"id": "high-contrast", "name": "High Contrast", "icon": "🔲"},
+    {"id": "oled", "name": "OLED", "icon": "⬛"},
+]
+
+DEFAULT_THEME = "light"
+
 CATEGORY_MAP = {
     "economy": {"name": "📰 Kinh tế", "emoji": "📰", "id": "economy"},
     "daily-briefing": {"name": "📰 Kinh tế", "emoji": "📰", "id": "daily-briefing"},  # legacy alias
@@ -182,6 +197,8 @@ def get_common_context(selected_date=None, category=None, query=None):
         context["selected_date_display"] = f'Tìm kiếm: "{query}"'
     
     context["articles"] = filtered
+    context["themes"] = THEMES
+    context["default_theme"] = DEFAULT_THEME
     
     return context
 

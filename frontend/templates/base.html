@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <link rel="stylesheet" href="/static/themes.css?v=1">
 </head>
 <body>
 
@@ -17,7 +18,19 @@
   <div class="top-bar-inner">
     <div class="top-bar-left">
       <span id="live-date" style="font-size:11px;"></span>
-      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌓 Theme</button>
+      <button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
+      <select class="theme-select" onchange="setTheme(this.value)" title="Chọn theme">
+        <option value="light">🗞️ Classic</option>
+        <option value="modern-magazine">✨ Magazine</option>
+        <option value="minimal">◻️ Minimal</option>
+        <option value="dark">🌙 Dark</option>
+        <option value="paper">📜 Paper</option>
+        <option value="terminal">💻 Terminal</option>
+        <option value="developer">👨‍💻 Developer</option>
+        <option value="comfortable-reading">📖 Comfortable</option>
+        <option value="high-contrast">🔲 High Contrast</option>
+        <option value="oled">⬛ OLED</option>
+      </select>
     </div>
     <div class="top-bar-right">
       <a href="/" style="color:var(--color-gray-400);text-decoration:none;font-size:11px;">Trang chủ</a>
@@ -82,17 +95,35 @@
 </footer>
 
 <script>
-// Theme
-(function() {
-  var t = localStorage.getItem('phuong-theme') || 'light';
-  document.documentElement.setAttribute('data-theme', t);
-})();
-function toggleTheme() {
-  var cur = document.documentElement.getAttribute('data-theme');
-  var next = cur === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('phuong-theme', next);
+// Theme Hub — 10 themes, runtime switching
+function getTheme() {
+  return localStorage.getItem('phuong-theme') || 'light';
 }
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('phuong-theme', t);
+  // Sync dropdown
+  var sel = document.querySelector('.theme-select');
+  if (sel) sel.value = t;
+}
+function toggleTheme() {
+  var cur = getTheme();
+  var themes = ['light','dark','modern-magazine','minimal','paper','terminal','developer','comfortable-reading','high-contrast','oled'];
+  var idx = themes.indexOf(cur);
+  var next = themes[(idx + 1) % themes.length];
+  setTheme(next);
+}
+
+// Apply saved theme immediately
+(function() {
+  var t = getTheme();
+  document.documentElement.setAttribute('data-theme', t);
+  var sel = document.querySelector('.theme-select');
+  if (sel) sel.value = t;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.documentElement.classList.add('reduce-motion');
+  }
+})();
 
 // Live date
 document.addEventListener('DOMContentLoaded', function() {

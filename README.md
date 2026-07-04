@@ -1,8 +1,22 @@
 # 🗞️ The Agent Times
 
-**A self-hosted, AI-powered news aggregator** — crawl, translate, and publish a personalized daily newspaper from global sources, all automated.
+<p align="center">
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License">
+  <img src="https://img.shields.io/badge/python-3.11+-blue" alt="Python">
+  <img src="https://img.shields.io/badge/flask-3.0+-green" alt="Flask">
+  <img src="https://img.shields.io/github/stars/Chillalot/the-agent-times?style=flat&color=yellow" alt="Stars">
+  <img src="https://img.shields.io/github/last-commit/Chillalot/the-agent-times" alt="Last Commit">
+  <img src="https://img.shields.io/badge/status-active-brightgreen" alt="Status">
+</p>
 
-> Built by an AI agent for a human who wanted a newspaper that actually reads the sources for them.
+<p align="center">
+  <strong>A self-hosted, AI-powered news aggregator</strong><br>
+  Crawl, translate, and publish a personalized daily newspaper from global sources — all automated.
+</p>
+
+<p align="center">
+  <sub>Built by an AI agent for a human who wanted a newspaper that actually reads the sources for them.</sub>
+</p>
 
 ---
 
@@ -22,6 +36,24 @@
 | 🕐 **Fully automated** | Cronjobs run daily — wake up to fresh news |
 | 🛠️ **Customizable** | Add your own RSS feeds, categories, design theme |
 | 📘 **AI Design Skills** | Comes with `design-master` (Design-Craft + Laws of UX) for AI agents without vision |
+
+---
+
+## 🏗️ Architecture
+
+```
+Sources (50+ RSS feeds)
+     ↓
+Scraper Scripts ──→ article_scraper.py ──→ googletrans (translate)
+     ↓                              ↓
+Article JSON files (data/reports/)
+     ↓
+Flask Web Server (port 5050)
+     ↓
+Responsive News Frontend (NYT/Axios design)
+```
+
+Full architecture diagram: [`docs/architecture/architecture.md`](docs/architecture/architecture.md)
 
 ---
 

@@ -317,7 +317,10 @@ def article(article_id):
                          today_iso=ctx["today_iso"],
                          all_dates=ctx["all_dates"],
                          active_nav=art["category"],
-                         category_colors=ctx["category_colors"])
+                         category_colors=ctx["category_colors"],
+                         themes=THEMES,
+                         layouts=LAYOUTS,
+                         default_theme="light")
 
 
 @app.route("/search")

@@ -1,24 +1,84 @@
 {% extends "base.html" %}
-{% block title %}Đang làm mới... — Phương's Daily{% endblock %}
+{% block title %}Đang cập nhật... — Phương's Daily{% endblock %}
 
 {% block content %}
-<article class="article-wrap">
-  <div class="article-badge">🔄 Hệ thống</div>
-  <h1 class="article-headline">Đang cập nhật báo cáo</h1>
-  <div class="article-divider"></div>
+<div style="max-width:600px;margin:60px auto;padding:0 20px;text-align:center;">
+  <div style="font-size:48px;margin-bottom:16px;animation:pulse 1.5s ease-in-out infinite;">📡</div>
+  <h1 style="font-family:var(--font-heading);font-size:28px;margin-bottom:8px;color:var(--text);">Đang cập nhật báo cáo</h1>
+  <p style="color:var(--text-gray);font-size:15px;margin-bottom:24px;">Hệ thống đang cào tin tức và viết bài...</p>
 
-  <div class="article-body" style="max-width:500px;margin:0 auto;text-align:left;">
-    {% for result in results %}
-    <p style="{% if result.startswith('✅') %}color:#1a7d36{% elif result.startswith('❌') %}color:var(--accent){% endif %}">
-      {{ result }}
-    </p>
-    {% endfor %}
-
-    <div style="text-align:center;margin-top:24px;">
-      <p style="color:var(--text-gray);margin-bottom:16px;">Tự động về trang chủ sau 3 giây...</p>
-      <a href="/" class="date-nav-btn">Về trang chủ</a>
-    </div>
+  <!-- Progress bar -->
+  <div style="background:var(--border-light);height:6px;border-radius:3px;overflow:hidden;margin-bottom:24px;">
+    <div id="progress-bar" style="background:var(--accent);height:100%;width:0%;transition:width 0.5s ease;border-radius:3px;"></div>
   </div>
-</article>
-<script>setTimeout(function(){window.location.href='/'},3000);</script>
+
+  <!-- Step indicators -->
+  <div style="display:flex;justify-content:center;gap:16px;margin-bottom:24px;flex-wrap:wrap;">
+    <div class="step-indicator" data-step="0" style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-light);font-family:var(--font-ui);">📰 Daily</div>
+    <div class="step-indicator" data-step="1" style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-light);font-family:var(--font-ui);">💻 Tech</div>
+    <div class="step-indicator" data-step="2" style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-light);font-family:var(--font-ui);">🐙 GitHub</div>
+    <div class="step-indicator" data-step="3" style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-light);font-family:var(--font-ui);">🌍 International</div>
+    <div class="step-indicator" data-step="4" style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-light);font-family:var(--font-ui);">🍗 F&B</div>
+  </div>
+
+  <!-- Log area -->
+  <div id="log-area" style="background:var(--bg-warm);border:1px solid var(--border-light);padding:16px;text-align:left;font-family:monospace;font-size:12px;line-height:1.7;max-height:300px;overflow-y:auto;color:var(--text-gray);margin-bottom:24px;"></div>
+
+  <!-- Redirect link (shown when done) -->
+  <div id="done-area" style="display:none;">
+    <a href="/" style="display:inline-block;background:var(--accent);color:white;padding:10px 24px;text-decoration:none;font-family:var(--font-ui);font-size:13px;">← Về trang chủ</a>
+  </div>
+</div>
+
+<style>
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.step-indicator.active{color:var(--accent)!important;font-weight:600}
+.step-indicator.done{color:#1a7d36!important}
+</style>
+
+<script>
+var JOB_ID = "{{ job_id }}";
+var POLL_INTERVAL = 2000; // 2 seconds
+
+function poll() {
+  fetch('/refresh/status/' + JOB_ID)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) { return; }
+      
+      // Update progress bar
+      var pct = Math.round((data.step / data.total) * 100);
+      document.getElementById('progress-bar').style.width = pct + '%';
+      
+      // Update step indicators
+      document.querySelectorAll('.step-indicator').forEach(function(el) {
+        var s = parseInt(el.getAttribute('data-step'));
+        el.className = 'step-indicator';
+        if (s < data.step) el.classList.add('done');
+        else if (s === data.step) el.classList.add('active');
+      });
+      
+      // Update log
+      var logEl = document.getElementById('log-area');
+      logEl.innerHTML = data.logs.map(function(l) { return '<div>' + l + '</div>'; }).join('');
+      logEl.scrollTop = logEl.scrollHeight;
+      
+      // Done?
+      if (data.done) {
+        document.getElementById('progress-bar').style.width = '100%';
+        document.getElementById('done-area').style.display = 'block';
+        setTimeout(function() { window.location.href = '/'; }, 3000);
+        return;
+      }
+      
+      setTimeout(poll, POLL_INTERVAL);
+    })
+    .catch(function() {
+      setTimeout(poll, POLL_INTERVAL);
+    });
+}
+
+// Start polling
+setTimeout(poll, 1000);
+</script>
 {% endblock %}

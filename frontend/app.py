@@ -51,6 +51,43 @@ CATEGORY_COLORS = {
 
 SHUTDOWN_TIMER = None  # Auto-shutdown after inactivity
 
+# === REFRESH PROGRESS TRACKING ===
+import threading as _threading
+_REFRESH_JOBS = {}
+_REFRESH_LOCK = _threading.Lock()
+
+def _run_refresh_pipeline(job_id):
+    """Run all pipelines in background thread, updating progress"""
+    steps = [
+        ("📰 Daily Briefing", ["bash", "autoreport_daily.sh"]),
+        ("💻 Tech News", ["bash", "autoreport_tech.sh"]),
+        ("🐙 GitHub Radar", ["bash", "autoreport_github.sh"]),
+        ("🌍 International", ["python3", "international_news.py"]),
+        ("🍗 F&B Report", ["bash", "autoreport_fnb.sh"]),
+    ]
+    logs = []
+    for i, (name, cmd) in enumerate(steps):
+        logs.append(f"⏳ {name}...")
+        with _REFRESH_LOCK:
+            _REFRESH_JOBS[job_id] = {"step": i, "total": len(steps), "logs": logs[:]}
+        try:
+            r = subprocess.run(
+                cmd, capture_output=True, text=True, timeout=300, cwd=SCRIPTS_DIR
+            )
+            for line in r.stdout.split('\n'):
+                line = line.strip()
+                if line and ('✅' in line or '📰' in line or '🐙' in line or '🌍' in line or '💻' in line or '🍗' in line or '❌' in line):
+                    logs.append(f"  {line}")
+            logs.append(f"✅ {name} hoàn tất")
+        except Exception as e:
+            logs.append(f"❌ {name} lỗi: {e}")
+        with _REFRESH_LOCK:
+            _REFRESH_JOBS[job_id] = {"step": i+1, "total": len(steps), "logs": logs[:], "done": i == len(steps)-1}
+    
+    with _REFRESH_LOCK:
+        _REFRESH_JOBS[job_id]["done"] = True
+        _REFRESH_JOBS[job_id]["logs"].append("🎉 All pipelines complete!")
+
 
 def load_all_articles():
     """Load tất cả articles từ reports directory"""
@@ -295,83 +332,33 @@ def search():
 
 
 @app.route("/refresh")
-def refresh():
-    """Chạy scripts → scrape URLs → tạo articles. KHÔNG còn link-list!"""
-    results = []
-    
-    # Run autoreport_daily.sh (which handles scraping internally)
-    try:
-        r = subprocess.run(
-            ["bash", os.path.join(SCRIPTS_DIR, "autoreport_daily.sh")],
-            capture_output=True, text=True, timeout=300, cwd=SCRIPTS_DIR
-        )
-        for line in r.stdout.split('\n'):
-            line = line.strip()
-            if line and ('✅' in line or '📰' in line or '❌' in line or '📊' in line):
-                results.append(line)
-        results.append("📰 Daily Briefing + scraping hoàn tất")
-    except Exception as e:
-        results.append(f"❌ Daily Briefing lỗi: {e}")
-    
-    # Run autoreport_tech.sh (tech news)
-    try:
-        r = subprocess.run(
-            ["bash", os.path.join(SCRIPTS_DIR, "autoreport_tech.sh")],
-            capture_output=True, text=True, timeout=300, cwd=SCRIPTS_DIR
-        )
-        for line in r.stdout.split('\n'):
-            line = line.strip()
-            if line and ('✅' in line or '💻' in line or '📡' in line or '📊' in line):
-                results.append(line)
-        results.append("💻 Tech News hoàn tất")
-    except Exception as e:
-        results.append(f"❌ Tech News lỗi: {e}")
-    
-    # Run GitHub radar
-    try:
-        r = subprocess.run(
-            ["bash", os.path.join(SCRIPTS_DIR, "autoreport_github.sh")],
-            capture_output=True, text=True, timeout=300, cwd=SCRIPTS_DIR
-        )
-        for line in r.stdout.split('\n'):
-            line = line.strip()
-            if line and ('✅' in line or '🐙' in line or '⏭️' in line or '📊' in line):
-                results.append(line)
-        results.append("🐙 GitHub Radar hoàn tất")
-    except Exception as e:
-        results.append(f"❌ GitHub Radar lỗi: {e}")
-    
-    # International news
-    try:
-        r = subprocess.run(
-            ["python3", os.path.join(SCRIPTS_DIR, "international_news.py")],
-            capture_output=True, text=True, timeout=300, cwd=SCRIPTS_DIR
-        )
-        for line in r.stdout.split('\n'):
-            line = line.strip()
-            if line and ('✅' in line or '🌍' in line or '📄' in line or '📊' in line):
-                results.append(line)
-        results.append("🌍 International News hoàn tất")
-    except Exception as e:
-        results.append(f"❌ International News lỗi: {e}")
-    
-    # F&B report
-    try:
-        r = subprocess.run(
-            ["bash", os.path.join(SCRIPTS_DIR, "autoreport_fnb.sh")],
-            capture_output=True, text=True, timeout=300, cwd=SCRIPTS_DIR
-        )
-        for line in r.stdout.split('\n'):
-            line = line.strip()
-            if line and ('✅' in line or '🍗' in line or '📊' in line or '📁' in line):
-                results.append(line)
-        results.append("🍗 F&B Report hoàn tất")
-    except Exception as e:
-        results.append(f"❌ F&B Report lỗi: {e}")
-    
+def refresh_page():
+    """Show refresh loading page immediately"""
+    import uuid
+    job_id = str(uuid.uuid4())[:8]
+    # Start background thread
+    t = _threading.Thread(target=_run_refresh_pipeline, args=(job_id,), daemon=True)
+    t.start()
+    with _REFRESH_LOCK:
+        _REFRESH_JOBS[job_id] = {"step": 0, "total": 5, "logs": ["🚀 Starting all pipelines..."]}
     ctx = get_common_context()
-    ctx["results"] = results
+    ctx["job_id"] = job_id
     return render_template("refresh.html", **ctx)
+
+
+@app.route("/refresh/status/<job_id>")
+def refresh_status(job_id):
+    """JSON status endpoint for polling"""
+    with _REFRESH_LOCK:
+        job = _REFRESH_JOBS.get(job_id)
+    if not job:
+        return {"error": "not found", "done": True}
+    return {
+        "step": job.get("step", 0),
+        "total": job.get("total", 5),
+        "logs": job.get("logs", []),
+        "done": job.get("done", False),
+    }
 
 
 # === ERROR HANDLERS ===

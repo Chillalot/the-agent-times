@@ -327,7 +327,7 @@ def refresh():
     except Exception as e:
         results.append(f"❌ Tech News lỗi: {e}")
     
-    # Run autoreport_github.sh (handles repos)
+    # Run GitHub radar
     try:
         r = subprocess.run(
             ["bash", os.path.join(SCRIPTS_DIR, "autoreport_github.sh")],
@@ -337,9 +337,37 @@ def refresh():
             line = line.strip()
             if line and ('✅' in line or '🐙' in line or '⏭️' in line or '📊' in line):
                 results.append(line)
-        results.append("🐙 GitHub Radar + article writer hoàn tất")
+        results.append("🐙 GitHub Radar hoàn tất")
     except Exception as e:
         results.append(f"❌ GitHub Radar lỗi: {e}")
+    
+    # International news
+    try:
+        r = subprocess.run(
+            ["python3", os.path.join(SCRIPTS_DIR, "international_news.py")],
+            capture_output=True, text=True, timeout=300, cwd=SCRIPTS_DIR
+        )
+        for line in r.stdout.split('\n'):
+            line = line.strip()
+            if line and ('✅' in line or '🌍' in line or '📄' in line or '📊' in line):
+                results.append(line)
+        results.append("🌍 International News hoàn tất")
+    except Exception as e:
+        results.append(f"❌ International News lỗi: {e}")
+    
+    # F&B report
+    try:
+        r = subprocess.run(
+            ["bash", os.path.join(SCRIPTS_DIR, "autoreport_fnb.sh")],
+            capture_output=True, text=True, timeout=300, cwd=SCRIPTS_DIR
+        )
+        for line in r.stdout.split('\n'):
+            line = line.strip()
+            if line and ('✅' in line or '🍗' in line or '📊' in line or '📁' in line):
+                results.append(line)
+        results.append("🍗 F&B Report hoàn tất")
+    except Exception as e:
+        results.append(f"❌ F&B Report lỗi: {e}")
     
     ctx = get_common_context()
     ctx["results"] = results

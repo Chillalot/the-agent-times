@@ -194,6 +194,7 @@ def get_common_context(selected_date=None, category=None, query=None):
         "today_iso": today_str,
         "all_dates": all_dates,
         "active_nav": "home",
+        "current_category": category or "",
         "category_colors": CATEGORY_COLORS,
     }
     

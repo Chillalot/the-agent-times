@@ -20,7 +20,7 @@ def run_cmd(cmd):
     except Exception as e:
         return f"[Lỗi] {e}"
 
-def fetch_rss(url, max_items=10):
+def fetch_rss(url, max_items=15):
     """Fetch và parse RSS feed"""
     ctx = ssl.create_default_context()
     ctx.check_hostname = False

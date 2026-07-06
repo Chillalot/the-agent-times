@@ -73,7 +73,7 @@ FEEDS = {
 }
 
 # ─── Constants ───────────────────────────────────────────────────────────────
-MAX_ITEMS_PER_FEED = 5
+MAX_ITEMS_PER_FEED = 15
 RSS_TIMEOUT = 20
 CATEGORY = "technology"
 CATEGORY_NAME = "💻 Công nghệ"

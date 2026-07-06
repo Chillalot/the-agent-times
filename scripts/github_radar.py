@@ -27,12 +27,12 @@ def main():
     print("=" * 60)
     
     categories = [
-        ("⚙️  Automation & Workflow", "automation+workflow+tool+topic:automation", 5),
-        ("🔒  Security & Auth", "security+vulnerability+scanner+topic:security", 5),
-        ("💼  Business & Analytics", "business+analytics+dashboard+topic:business", 5),
-        ("📢  Affiliate & Marketing", "affiliate+marketing+cms+landing-page", 5),
-        ("🤖  AI for Business", "AI+business+automation+topic:artificial-intelligence", 5),
-        ("🛒  F&B / Restaurant Tech", "restaurant+food+ordering+point-of-sale", 3),
+        ("⚙️  Automation & Workflow", "automation+workflow+tool+topic:automation", 10),
+        ("🔒  Security & Auth", "security+vulnerability+scanner+topic:security", 10),
+        ("💼  Business & Analytics", "business+analytics+dashboard+topic:business", 10),
+        ("📢  Affiliate & Marketing", "affiliate+marketing+cms+landing-page", 10),
+        ("🤖  AI for Business", "AI+business+automation+topic:artificial-intelligence", 10),
+        ("🛒  F&B / Restaurant Tech", "restaurant+food+ordering+point-of-sale", 5),
     ]
     
     seen = set()

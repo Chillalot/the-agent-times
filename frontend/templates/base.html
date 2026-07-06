@@ -52,17 +52,30 @@
 <!-- DATE NAV -->
 <div class="date-nav">
   <div class="date-nav-inner">
-    <a href="/date/{{ prev_date }}" class="date-nav-btn">‹ Trước</a>
+    {% set date_base = "/date/" + selected_date_iso %}
+    {% if current_category %}
+      {% set prev_url = "/category/" + current_category + "/date/" + (prev_date or selected_date_iso) %}
+      {% set next_url = "/category/" + current_category + "/date/" + (next_date) if next_date else "" %}
+      {% set picker_url = "/category/" + current_category + "/date/" %}
+      {% set today_url = "/category/" + current_category + "/date/" + today_iso %}
+    {% else %}
+      {% set prev_url = "/date/" + (prev_date or selected_date_iso) %}
+      {% set next_url = "/date/" + (next_date) if next_date else "" %}
+      {% set picker_url = "/date/" %}
+      {% set today_url = "/date/" + today_iso %}
+    {% endif %}
+      
+    <a href="{{ prev_url }}" class="date-nav-btn">‹ Trước</a>
     <span class="date-nav-current">{{ selected_date_display }}</span>
-    <input type="date" class="date-input" value="{{ selected_date_iso }}" onchange="window.location.href='/date/'+this.value">
+    <input type="date" class="date-input" value="{{ selected_date_iso }}"
+           onchange="window.location.href='{{ picker_url }}' + this.value">
     {% if next_date %}
-    <a href="/date/{{ next_date }}" class="date-nav-btn">Sau ›</a>
+    <a href="{{ next_url }}" class="date-nav-btn">Sau ›</a>
     {% else %}
     <span class="date-nav-btn" style="opacity:0.3;cursor:default;">Sau ›</span>
     {% endif %}
-    <a href="/date/{{ today_iso }}" class="date-nav-today">Hôm nay</a>
+    <a href="{{ today_url }}" class="date-nav-today">Hôm nay</a>
   </div>
-</div>
 
 <!-- SEARCH -->
 <div class="search-area">

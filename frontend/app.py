@@ -176,7 +176,12 @@ def get_common_context(selected_date=None, category=None, query=None):
     
     # Nếu không có selected_date, lấy ngày gần nhất có báo cáo
     if not selected_date:
-        selected_date = all_dates[0] if all_dates else today_str
+        if category and category in CATEGORY_MAP:
+            # Ưu tiên ngày có bài trong category này
+            cat_dates = sorted(set(a["date"] for a in all_arts if a["category"] == category), reverse=True)
+            selected_date = cat_dates[0] if cat_dates else (all_dates[0] if all_dates else today_str)
+        else:
+            selected_date = all_dates[0] if all_dates else today_str
     
     prev_date, next_date = get_prev_next_dates(selected_date, all_dates)
     

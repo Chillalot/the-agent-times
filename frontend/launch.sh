@@ -5,7 +5,7 @@
 # ================================================================
 
 PORT=5050
-FRONTEND_DIR="$HOME/.hermes/profiles/meow/frontend"
+FRONTEND_DIR="${FRONTEND_DIR:-$(cd "$(dirname "$0")" && pwd)}"
 LOG_FILE="$FRONTEND_DIR/server.log"
 MARKER="$FRONTEND_DIR/.launched"
 

@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "the-agent-times"
+version = "1.1.0"
+description = "AI-operated news publishing platform"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7",
+    "pytest-cov>=4",
+]
+frontend = [
+    "flask>=3.0",
+    "gunicorn>=21.2",
+    "readability-lxml>=0.8",
+    "beautifulsoup4>=4.12",
+    "requests>=2.31",
+    "lxml>=5.0",
+    "googletrans==4.0.0rc1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-v"
+
+[tool.setuptools.packages.find]
+include = ["frontend*", "scripts*", "tests*"]

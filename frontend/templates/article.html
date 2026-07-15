@@ -22,10 +22,20 @@
       </div>
       {% endif %}
 
-      <!-- Featured image -->
-      {% if article.get('lead_image') %}
-      <div style="margin-bottom:24px;">
-        <img src="{{ article.lead_image }}" alt="{{ article.title }}" style="width:100%;max-width:100%;border:1px solid var(--border-light);">
+      <!-- Featured image (fallback nếu content_html chưa có) -->
+      {% if article.get('lead_image') and article.lead_image not in (article.content_html or '') %}
+      <div class="article-featured">
+        <img src="{{ article.lead_image }}" alt="{{ article.title }}" loading="lazy">
+      </div>
+      {% endif %}
+
+      {% if article.get('body_images') and article.body_images|length > 1 %}
+      <div class="article-gallery">
+        {% for img in article.body_images[1:4] %}
+        <figure class="gallery-figure">
+          <img src="{{ img.src }}" alt="{{ img.alt or article.title }}" loading="lazy">
+        </figure>
+        {% endfor %}
       </div>
       {% endif %}
 

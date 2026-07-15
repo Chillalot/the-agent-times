@@ -215,10 +215,10 @@ def main():
     print(f"\n🏗 TECH: {json.dumps(report['tech_stack'], ensure_ascii=False)}")
     
     # Save report
-    reports_dir = os.path.expanduser("~/.hermes/profiles/meow/reports")
+    from scripts.config import REPORTS_DIR
     fname = f"cloned_{url.split('://')[1].split('/')[0].replace('.','_')}.json"
-    fpath = os.path.join(reports_dir, fname)
-    os.makedirs(reports_dir, exist_ok=True)
+    fpath = os.path.join(REPORTS_DIR, fname)
+    os.makedirs(REPORTS_DIR, exist_ok=True)
     with open(fpath, 'w') as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
     print(f"\n💾 Saved: {fpath}")

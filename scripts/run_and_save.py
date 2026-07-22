@@ -10,9 +10,7 @@ import json
 import re
 from datetime import datetime
 
-# Config
-REPORTS_DIR = os.path.expanduser("~/.hermes/profiles/meow/reports")
-SCRIPTS_DIR = os.path.expanduser("~/.hermes/profiles/meow/scripts")
+from scripts.config import REPORTS_DIR, SCRIPTS_DIR
 
 CATEGORY_MAP = {
     "daily-briefing": {"name": "📰 Kinh tế & Công nghệ", "emoji": "📰"},

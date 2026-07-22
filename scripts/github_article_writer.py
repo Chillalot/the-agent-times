@@ -11,8 +11,7 @@ import re
 from datetime import datetime
 
 # ─── Config ────────────────────────────────────────────────────────────────
-SCRIPTS_DIR = os.path.expanduser("~/.hermes/profiles/meow/scripts")
-REPORTS_DIR = os.path.expanduser("~/.hermes/profiles/meow/reports")
+from scripts.config import SCRIPTS_DIR, REPORTS_DIR
 
 # ─── Parse helpers ─────────────────────────────────────────────────────────
 
@@ -322,16 +321,7 @@ def save_article(article, reports_dir):
 # ─── Main ──────────────────────────────────────────────────────────────────
 
 def main():
-    reports_dir = os.path.join(os.path.dirname(__file__), "..", "reports")
-    reports_dir = os.path.abspath(reports_dir)
-
-    # Allow override via env vars
-    reports_dir = os.environ.get("REPORTS_DIR", reports_dir)
-    scripts_dir = os.environ.get("SCRIPTS_DIR", os.path.dirname(os.path.abspath(__file__)))
-
-    # Fall back to constants
-    reports_dir = os.environ.get("REPORTS_DIR", REPORTS_DIR)
-    scripts_dir = os.environ.get("SCRIPTS_DIR", SCRIPTS_DIR)
+    reports_dir = os.environ.get("REPORTS_DIR", str(REPORTS_DIR))
 
     # Find all github_*.json files
     input_files = sorted([

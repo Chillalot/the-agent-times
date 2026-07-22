@@ -5,13 +5,19 @@ Chạy mỗi sáng 8h: tổng hợp tin tức kinh tế, F&B, luật pháp, GitH
 Mở rộng: từ quán cơm gà → tổng thể F&B (trà sữa, cf, cloud kitchen, chain, ...)
 """
 
-import subprocess, json, urllib.request, urllib.error, ssl, sys
+import json
+import ssl
+import subprocess
+import sys
+import urllib.error
+import urllib.request
 from datetime import datetime
-from xml.etree import ElementTree as ET
 
-BLOGWATCHER = "/home/chillalot/.hermes/profiles/meow/bin/blogwatcher-cli"
-PROFILE = "meow"
-SCRIPTS_DIR = "/home/chillalot/.hermes/profiles/meow/scripts"
+from scripts.config import SCRIPTS_DIR
+from scripts.lib.rss import fetch_rss
+
+BLOGWATCHER = str(SCRIPTS_DIR.parent / "bin" / "blogwatcher-cli")
+
 
 def run_cmd(cmd):
     try:
@@ -20,57 +26,13 @@ def run_cmd(cmd):
     except Exception as e:
         return f"[Lỗi] {e}"
 
-def fetch_rss(url, max_items=15):
-    """Fetch và parse RSS feed"""
-    ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
-    try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=15, context=ctx) as resp:
-            data = resp.read()
-        root = ET.fromstring(data)
-        # Handle RSS 2.0
-        items = []
-        for item in root.iter("item"):
-            title = item.findtext("title", "")
-            link = item.findtext("link", "")
-            pubdate = item.findtext("pubDate", "")
-            desc = item.findtext("description", "")
-            if title:
-                items.append({
-                    "title": title.strip(),
-                    "link": link.strip(),
-                    "date": pubdate.strip()[:25],
-                    "desc": desc.strip()[:200]
-                })
-            if len(items) >= max_items:
-                break
-        # Handle Atom
-        if not items:
-            for entry in root.iter("{http://www.w3.org/2005/Atom}entry"):
-                title = entry.findtext("{http://www.w3.org/2005/Atom}title", "")
-                link_el = entry.find("{http://www.w3.org/2005/Atom}link")
-                link = link_el.get("href", "") if link_el is not None else ""
-                updated = entry.findtext("{http://www.w3.org/2005/Atom}updated", "")
-                if title:
-                    items.append({
-                        "title": title.strip(),
-                        "link": link.strip(),
-                        "date": updated.strip()[:19],
-                        "desc": ""
-                    })
-                if len(items) >= max_items:
-                    break
-        return items
-    except Exception as e:
-        return [{"title": f"[Lỗi RSS: {url[:50]}...]", "link": "", "date": "", "desc": str(e)[:100]}]
 
 def get_blogwatcher_articles():
     """Lấy bài mới từ blogwatcher"""
     out = run_cmd([BLOGWATCHER, "scan"])
     out2 = run_cmd([BLOGWATCHER, "articles", "--all"])
     return out, out2
+
 
 def get_github_trending():
     """Fetch GitHub trending repos relevant to business/F&B/automation/security"""
@@ -104,8 +66,9 @@ def get_github_trending():
                 })
             results[cat] = repos
         except Exception as e:
-            results[cat] = [{"name": f"[Error]", "stars": 0, "desc": str(e)[:80], "url": ""}]
+            results[cat] = [{"name": "[Error]", "stars": 0, "desc": str(e)[:80], "url": ""}]
     return results
+
 
 def get_news_roundup():
     """Tổng hợp tin tức từ các RSS feeds — mở rộng F&B"""
@@ -122,8 +85,10 @@ def get_news_roundup():
     }
     results = {}
     for name, url in feeds.items():
-        results[name] = fetch_rss(url, 6)
+        result = fetch_rss(url, 6)
+        results[name] = result.get("items", [])
     return results
+
 
 def main():
     today = datetime.now().strftime("%A, %d/%m/%Y")
@@ -165,7 +130,6 @@ def main():
   • Các mô hình mới: trà sữa, cà phê specialty, ăn vặt healthy
   • Quản lý chuỗi: tiêu chuẩn hoá quy trình, kiểm soát nhiều cửa hàng
   """)
-    # Check for F&B related keywords in today's news
     fnb_keywords = ["thực phẩm", "đồ uống", "Ẩm thực", "nhà hàng", "quán ăn",
                     "cơm", "gà", "trà", "cà phê", "cloud kitchen", "F&B",
                     "food", "beverage", "restaurant"]
@@ -233,7 +197,7 @@ def main():
      • TNCN: 1.5% doanh thu
      • Tổng thuế khoán: ~2.5% doanh thu
   """)
-    print("  ⚠️  Xem chi tiết: python3 ~/.hermes/profiles/meow/scripts/legal_tax_guide.py")
+    print(f"  ⚠️  Xem chi tiết: python3 {SCRIPTS_DIR}/legal_tax_guide.py")
     print("  💡 Với chuỗi: cần chuyển sang Công ty TNHH + kế toán dịch vụ")
 
     # 5. F&B BUSINESS MODEL SPOTLIGHT
@@ -241,7 +205,7 @@ def main():
     print("✨  SPOTLIGHT: MÔ HÌNH F&B ĐANG HOT")
     print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     print("""
-  🏪 Quán cơm gà (foundation): 
+  🏪 Quán cơm gà (foundation):
      • Vốn thấp, quay vòng nhanh, dễ mở rộng
      • Tiềm năng: thêm chi nhánh, thêm dịch vụ giao hàng
 
@@ -283,6 +247,7 @@ def main():
     scan_out, art_out = get_blogwatcher_articles()
     print(f"  {scan_out[:300]}")
     print(f"\n  Bài mới:\n{art_out[:300]}")
+
 
 if __name__ == "__main__":
     main()

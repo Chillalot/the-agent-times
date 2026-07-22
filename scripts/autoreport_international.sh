@@ -1,7 +1,7 @@
 #!/bin/bash
 # Pipeline: International News → Translate → Save
-SCRIPTS_DIR="$HOME/.hermes/profiles/meow/scripts"
-REPORTS_DIR="$HOME/.hermes/profiles/meow/reports"
+SCRIPTS_DIR="${SCRIPTS_DIR:-$(cd "$(dirname "$0")" && pwd)}"
+REPORTS_DIR="${REPORTS_DIR:-$(dirname "$SCRIPTS_DIR")/data/reports}"
 cd "$SCRIPTS_DIR"
 
 echo "🌍 Pipeline International News"

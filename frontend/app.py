@@ -8,6 +8,8 @@ from pathlib import Path
 from datetime import datetime, date, timedelta
 from flask import Flask, render_template, request, abort, redirect, url_for, make_response
 
+from scripts.config import REPORTS_DIR, SCRIPTS_DIR
+
 app = Flask(__name__)
 
 # === CACHE BUSTING — no cache for HTML/CSS ===
@@ -21,8 +23,6 @@ def no_cache(response):
     return response
 
 # === CONFIG ===
-REPORTS_DIR = os.path.expanduser("~/.hermes/profiles/meow/reports")
-SCRIPTS_DIR = os.path.expanduser("~/.hermes/profiles/meow/scripts")
 
 CATEGORY_MAP = {
     "economy": {"name": "📰 Kinh tế", "emoji": "📰", "id": "economy"},
@@ -58,12 +58,16 @@ _REFRESH_LOCK = _threading.Lock()
 
 def _run_refresh_pipeline(job_id):
     """Run all pipelines in background thread, updating progress"""
+    env = os.environ.copy()
+    env["SCRIPTS_DIR"] = str(SCRIPTS_DIR)
+    env["REPORTS_DIR"] = str(REPORTS_DIR)
+
     steps = [
-        ("📰 Daily Briefing", ["bash", "autoreport_daily.sh"]),
-        ("💻 Tech News", ["bash", "autoreport_tech.sh"]),
-        ("🐙 GitHub Radar", ["bash", "autoreport_github.sh"]),
+        ("💻 Tech News", ["python3", "tech_news.py"]),
         ("🌍 International", ["python3", "international_news.py"]),
-        ("🍗 F&B Report", ["bash", "autoreport_fnb.sh"]),
+        ("📰 Daily Briefing", ["python3", "run_and_save.py", "daily_briefing.py", "daily-briefing", "📰 Kinh tế & Công nghệ"]),
+        ("🐙 GitHub Radar", ["python3", "run_and_save.py", "github_radar.py", "github", "🐙 Công nghệ & GitHub"]),
+        ("🍗 F&B Report", ["python3", "run_and_save.py", "fnb_market_report.py", "fnb", "🍗 F&B & Quán ăn"]),
     ]
     logs = []
     for i, (name, cmd) in enumerate(steps):
@@ -72,18 +76,20 @@ def _run_refresh_pipeline(job_id):
             _REFRESH_JOBS[job_id] = {"step": i, "total": len(steps), "logs": logs[:]}
         try:
             r = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=300, cwd=SCRIPTS_DIR
+                cmd, capture_output=True, text=True, timeout=300, cwd=SCRIPTS_DIR, env=env
             )
             for line in r.stdout.split('\n'):
                 line = line.strip()
                 if line and ('✅' in line or '📰' in line or '🐙' in line or '🌍' in line or '💻' in line or '🍗' in line or '❌' in line):
                     logs.append(f"  {line}")
+            if r.returncode != 0:
+                logs.append(f"  ⚠️  stderr: {r.stderr[:200]}")
             logs.append(f"✅ {name} hoàn tất")
         except Exception as e:
             logs.append(f"❌ {name} lỗi: {e}")
         with _REFRESH_LOCK:
             _REFRESH_JOBS[job_id] = {"step": i+1, "total": len(steps), "logs": logs[:], "done": i == len(steps)-1}
-    
+
     with _REFRESH_LOCK:
         _REFRESH_JOBS[job_id]["done"] = True
         _REFRESH_JOBS[job_id]["logs"].append("🎉 All pipelines complete!")
@@ -230,7 +236,7 @@ def get_common_context(selected_date=None, category=None, query=None):
 
 
 # === CLEANUP MECHANISM ===
-SHUTDOWN_FILE = os.path.expanduser("~/.hermes/profiles/meow/frontend/.shutdown")
+SHUTDOWN_FILE = str(SCRIPTS_DIR / ".." / "frontend" / ".shutdown")
 
 @app.route("/shutdown")
 def shutdown():
@@ -377,7 +383,7 @@ def not_found(e):
 
 # === LAUNCH DETECTION ===
 # If running via launch script, this file marks the session
-MARKER = os.path.expanduser("~/.hermes/profiles/meow/frontend/.launched")
+MARKER = str(SCRIPTS_DIR / ".." / "frontend" / ".launched")
 
 
 if __name__ == "__main__":

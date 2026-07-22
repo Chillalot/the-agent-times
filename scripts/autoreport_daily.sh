@@ -2,9 +2,11 @@
 # Master Pipeline: Phase 1 → Collect ALL data, Phase 2 → Write ALL articles
 # Chạy vào 8h sáng mỗi ngày, đồng bộ tất cả hạng mục
 
-SCRIPTS_DIR="$HOME/.hermes/profiles/meow/scripts"
-REPORTS_DIR="$HOME/.hermes/profiles/meow/reports"
+SCRIPTS_DIR="${SCRIPTS_DIR:-$(cd "$(dirname "$0")" && pwd)}"
+REPORTS_DIR="${REPORTS_DIR:-$(dirname "$SCRIPTS_DIR")/data/reports}"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+
+cd "$SCRIPTS_DIR"
 
 echo "═══════════════════════════════════════════════"
 echo "  📡 MASTER PIPELINE — $TIMESTAMP"
